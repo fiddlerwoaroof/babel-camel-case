@@ -1,0 +1,133 @@
+#+EXPORT_FILE_NAME: docs/index.html
+#+HTML_HEAD: <link rel=stylesheet href="./colors.css" />
+#+OPTIONS: ^:nil
+
+** Sample babel transform to turn snake_case into camelCase
+
+First we write a simple function that takes a snake_case string and
+turns it into camel case:
+
+#+BEGIN_SRC js :tangle src/index.js :comments link
+  function snakeToCamel(str) {
+    const [first, ...rest] = str.split("_");
+    return `${first}${rest.map(capitalize).join("")}`;
+  }
+
+  function capitalize([v, ...vs]) {
+    return `${v.toLocaleUpperCase()}${vs.join("")}`;
+  }
+#+END_SRC
+
+Next, we define our babel plugin. We don't need any direct dependency
+on babel, since babel injects its functionality as an argument to the
+plugin.  Here, we're accessing =@babel/types= from the argument passed
+to our function and then creating a =visitor= that handles each
+=Identifier= node.  For each node, we rename it using babel's
+scope-handling functions, which handles most of the cases we care
+about, except for toplevel definitions like src_js{foo = bar}.  To
+handle those, we replace the path with a camel-cased version of the
+node.
+
+#+BEGIN_SRC js :tangle src/index.js :comments link
+  module.exports = function camelCasingVisitor({ types: t }) {
+    return {
+      visitor: {
+        Identifier(path) {
+          if (isSnakeCased(path.node)) {
+            path.scope.rename(path.node.name, snakeToCamel(path.node.name));
+            path.replaceWith(t.identifier(snakeToCamel(path.node.name)));
+          }
+        },
+      },
+    };
+  };
+
+  function isSnakeCased(node) {
+    return /_/.test(node.name)
+  }
+#+END_SRC
+
+** Sample results
+
+Given this plugin, if we create a new babel project that includes it
+(relative path here because it's in the same project):
+
+#+BEGIN_SRC json :tangle sample/babel.config.json
+  {
+    "compact": false,
+    "retainLines": true,
+    "plugins": ["../src/index"]
+  }
+#+END_SRC
+
+Then, given some javascript with snake_case identifiers:
+
+#+BEGIN_SRC js :tangle sample/sample1.js :comments link
+  import { a_thing } from "some_unconventional_package";
+
+  const my_constant = a_thing(4);
+
+  function some_function_stuff() {
+    let my_local_variable;
+    return function inner_function() {
+      const other_local_variable = 1;
+      return my_local_variable + other_local_variable + "!";
+    };
+  }
+
+  // Renaming this one is sort of dangerous 🤔
+  undeclared_variable = 234;
+#+END_SRC
+
+We get this output:
+
+#+BEGIN_SRC js :tangle no
+  import { aThing } from "some_unconventional_package";
+
+  const myConstant = aThing(4);
+
+  function someFunctionStuff() {
+    let myLocalVariable;
+    return function innerFunction() {
+      const otherLocalVariable = 1;
+      return myLocalVariable + otherLocalVariable + "!";
+    };
+  }
+
+  // Renaming this one is sort of dangerous 🤔
+  undeclaredVariable = 234;
+#+END_SRC
+
+** Limitations
+
+*** Renaming undeclared globals is problematic
+
+the js_src(undeclared_variable} example above is a bit problematic:
+with this transform, there's no way to access names you don't control
+that might exist in the global environment of your code. We could add
+some sort of comment directive for this, but it would mar the
+aesthetics of the demo. We could also just leave them alone, but that
+would mar the aesthetics too.
+
+*** Name clashes possible
+
+The names don't always manage to avoid collisions, if a matching
+camelCase identifier already exists. For example this code:
+
+#+BEGIN_SRC js :tangle sample/sample2.js :comments link
+  const a_name = 'foo'
+  function aName() {}
+
+  // This will be renamed to aName and clash with the function
+  a_name.toLower();
+#+END_SRC
+
+Produces this result:
+
+#+BEGIN_SRC js :tangle no
+  const aName = 'foo';
+  function aName() {}
+
+  // This will be renamed to aName and clash with the function
+  aName.toLower();
+#+END_SRC

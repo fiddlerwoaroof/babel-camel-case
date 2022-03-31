@@ -1,0 +1,5 @@
+#!/usr/bin/env zsh
+
+path=("${(@)path:#${DIRENV_DIR#-}/bin}")
+
+TMPDIR="$(emacs-tmpdir)" emacsclient "$@"

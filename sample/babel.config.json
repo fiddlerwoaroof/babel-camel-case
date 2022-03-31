@@ -1,0 +1,5 @@
+{
+  "compact": false,
+  "retainLines": true,
+  "plugins": ["../src/index"]
+}
