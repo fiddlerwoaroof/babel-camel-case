@@ -2,7 +2,7 @@
 #+HTML_HEAD: <link rel=stylesheet href="./colors.css" />
 #+OPTIONS: ^:nil
 
-** Sample babel transform to turn snake_case into camelCase
+** [[https://github.com/fiddlerwoaroof/babel-camel-case][Sample babel transform to turn snake_case into camelCase]]
 
 First we write a simple function that takes a snake_case string and
 turns it into camel case:
