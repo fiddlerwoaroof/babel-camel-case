@@ -1,4 +1,4 @@
-// [[file:../README.org::*Sample babel transform to turn snake_case into camelCase][Sample babel transform to turn snake_case into camelCase:1]]
+// [[file:../README.org::*\[\[https:/github.com/fiddlerwoaroof/babel-camel-case\]\[Sample babel transform to turn snake_case into camelCase\]\]][[[https://github.com/fiddlerwoaroof/babel-camel-case][Sample babel transform to turn snake_case into camelCase]]:1]]
 function snakeToCamel(str) {
   const [first, ...rest] = str.split("_");
   return `${first}${rest.map(capitalize).join("")}`;
@@ -7,9 +7,9 @@ function snakeToCamel(str) {
 function capitalize([v, ...vs]) {
   return `${v.toLocaleUpperCase()}${vs.join("")}`;
 }
-// Sample babel transform to turn snake_case into camelCase:1 ends here
+// [[https://github.com/fiddlerwoaroof/babel-camel-case][Sample babel transform to turn snake_case into camelCase]]:1 ends here
 
-// [[file:../README.org::*Sample babel transform to turn snake_case into camelCase][Sample babel transform to turn snake_case into camelCase:2]]
+// [[file:../README.org::*\[\[https:/github.com/fiddlerwoaroof/babel-camel-case\]\[Sample babel transform to turn snake_case into camelCase\]\]][[[https://github.com/fiddlerwoaroof/babel-camel-case][Sample babel transform to turn snake_case into camelCase]]:2]]
 module.exports = function camelCasingVisitor({ types: t }) {
   return {
     visitor: {
@@ -26,4 +26,4 @@ module.exports = function camelCasingVisitor({ types: t }) {
 function isSnakeCased(node) {
   return /_/.test(node.name);
 }
-// Sample babel transform to turn snake_case into camelCase:2 ends here
+// [[https://github.com/fiddlerwoaroof/babel-camel-case][Sample babel transform to turn snake_case into camelCase]]:2 ends here
