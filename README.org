@@ -102,7 +102,7 @@ We get this output:
 
 *** Renaming undeclared globals is problematic
 
-the js_src(undeclared_variable} example above is a bit problematic:
+the src_js[:exports code]{undeclared_variable} example above is a bit problematic:
 with this transform, there's no way to access names you don't control
 that might exist in the global environment of your code. We could add
 some sort of comment directive for this, but it would mar the
